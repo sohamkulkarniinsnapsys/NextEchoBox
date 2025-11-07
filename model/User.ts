@@ -28,6 +28,9 @@ export interface User extends Document {
     isVerified: boolean;
     isAcceptingMessages: boolean;
     messages: Message[];
+    // OAuth fields (optional)
+    googleId?: string;
+    providers?: Array<{ name: string; providerId: string }>;
 }
 
 // Updated User schema
@@ -46,15 +49,24 @@ const UserSchema: Schema<User> = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'Password is required'],
+    required: false, // Not required for OAuth users
   },
   verifyCode: {
     type: String,
-    required: [true, 'Verify Code is required'],
+    required: false, // Not required for OAuth users
   },
   verifyCodeExpiry: {
     type: Date,
-    required: [true, 'Verify Code Expiry is required'],
+    required: false, // Not required for OAuth users
+  },
+  googleId: {
+    type: String,
+    required: false,
+  },
+  providers: {
+    type: [{ name: String, providerId: String }],
+    required: false,
+    default: [],
   },
   isVerified: {
     type: Boolean,

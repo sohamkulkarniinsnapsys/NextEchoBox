@@ -1,13 +1,31 @@
 // app/api/auth/[...nextauth]/options.ts
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
+import { randomBytes } from "crypto";
 import dbConnect from "@/lib/dbConnect";
-import UserModel, { User } from "@/model/User"; // assume IUser is your interface for the mongoose doc
+import UserModel, { User } from "@/model/User";
 
 // Ensure required env present early (helpful for logs)
 if (!process.env.NEXTAUTH_SECRET) {
   console.warn("NEXTAUTH_SECRET is not set — sessions may be insecure.");
+}
+
+// Helper: generate unique username from email base
+async function generateUniqueUsername(base: string): Promise<string> {
+  const clean = base.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 14) || "user";
+  let username = clean;
+  let i = 0;
+  while (await UserModel.exists({ username })) {
+    i++;
+    username = `${clean}${i}`;
+    if (i > 1000) {
+      username = `${clean}${randomBytes(3).toString("hex")}`;
+      break;
+    }
+  }
+  return username;
 }
 
 export const authOptions: NextAuthOptions = {
@@ -71,6 +89,12 @@ export const authOptions: NextAuthOptions = {
         }
       },
     }),
+
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      // Default scopes: openid, email, profile
+    }),
   ],
 
   callbacks: {
@@ -104,6 +128,72 @@ export const authOptions: NextAuthOptions = {
         sUser.isAcceptingMessages = token.isAcceptingMessages;
 
       return session;
+    },
+
+    // Link/create DB user for OAuth sign-ins
+    async signIn({ user, account, profile }) {
+      try {
+        // Only handle Google provider logic here
+        if (account?.provider === "google") {
+          await dbConnect();
+          const providerEmail = (profile as any)?.email;
+          const emailVerified = (profile as any)?.email_verified ?? false;
+          const googleId = (profile as any)?.sub ?? (profile as any)?.id;
+
+          if (!providerEmail) {
+            console.warn("Google provider did not return an email — denying sign in.");
+            return false;
+          }
+
+          // Require email to be verified by Google
+          if (!emailVerified) {
+            console.warn("Google email not verified — denying sign in.");
+            return false;
+          }
+
+          // Find existing user by email
+          let dbUser = await UserModel.findOne({ email: providerEmail });
+
+          if (dbUser) {
+            // Link Google account if not already linked
+            if (!dbUser.googleId && googleId) {
+              dbUser.googleId = googleId;
+              dbUser.providers = dbUser.providers || [];
+              if (!dbUser.providers.find((p: any) => p.name === "google")) {
+                dbUser.providers.push({ name: "google", providerId: googleId });
+              }
+            }
+            // Auto-verify if Google says email is verified
+            if (emailVerified && !dbUser.isVerified) {
+              dbUser.isVerified = true;
+            }
+            await dbUser.save();
+          } else {
+            // Create new user
+            const base = providerEmail.split("@")[0];
+            const username = await generateUniqueUsername(base);
+            dbUser = await UserModel.create({
+              username,
+              email: providerEmail,
+              isVerified: Boolean(emailVerified),
+              isAcceptingMessages: true,
+              googleId: googleId,
+              providers: googleId ? [{ name: "google", providerId: googleId }] : [],
+              // No password for OAuth users
+            });
+          }
+
+          // Attach DB fields to the NextAuth 'user' object so jwt callback copies them
+          (user as any).id = dbUser._id.toString();
+          (user as any).username = dbUser.username;
+          (user as any).isVerified = Boolean(dbUser.isVerified);
+          (user as any).isAcceptingMessages = Boolean(dbUser.isAcceptingMessages);
+        }
+        return true;
+      } catch (err) {
+        console.error("Error in signIn callback for Google OAuth:", err);
+        return false;
+      }
     },
   },
 
