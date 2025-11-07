@@ -4,9 +4,13 @@ import React, { useState } from 'react';
 import axios, { AxiosError } from 'axios';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { Loader2, Send, Sparkles, MessageCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Loader2, Send, Sparkles, MessageCircle, MessageSquare, Wand2, ArrowRight, UserPlus } from 'lucide-react';
 import { FancyButton } from '@/components/ui/FancyButton';
-import { GlassCard } from '@/components/ui/GlassCard';
+import { AceternityCard } from '@/components/ui/aceternity/AceternityCard';
+import { TextGenerateEffect } from '@/components/ui/aceternity/TextGenerateEffect';
+import { AuroraBackground } from '@/components/ui/aceternity/AuroraBackground';
+import { BackgroundBeams } from '@/components/ui/aceternity/BackgroundBeams';
 import { toast } from 'sonner';
 import * as z from 'zod';
 import { ApiResponse } from '@/types/ApiResponse';
@@ -100,142 +104,436 @@ export default function SendMessage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-2xl space-y-8">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden">
+      {/* Background effects */}
+      <div className="absolute inset-0 -z-10">
+        <AuroraBackground showRadialGradient={false} />
+        <BackgroundBeams />
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="w-full max-w-2xl space-y-8"
+      >
         {/* Header */}
-        <div className="text-center space-y-4">
-          <div className="flex justify-center">
-            <div className="p-4 rounded-full bg-gradient-to-br from-[oklch(0.65_0.25_280)] to-[oklch(0.75_0.18_220)]">
-              <MessageCircle className="w-10 h-10 text-white" />
+        <motion.div 
+          className="text-center space-y-4"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <motion.div 
+            className="flex justify-center"
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="p-4 rounded-full bg-gradient-to-br from-[var(--color-primary-start)] to-[var(--color-primary-end)] shadow-[var(--shadow-neon)]">
+              <motion.div
+                animate={{
+                  scale: [1, 1.2, 1],
+                  rotate: [0, -10, 10, 0],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  repeatDelay: 2,
+                }}
+              >
+                <MessageSquare className="w-10 h-10 text-white" />
+              </motion.div>
             </div>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-[var(--text-primary)]">
-            Send Message to <span className="bg-gradient-to-r from-[oklch(0.65_0.25_280)] via-[oklch(0.70_0.22_260)] to-[oklch(0.75_0.18_220)] bg-clip-text text-transparent">@{username}</span>
-          </h1>
-          <p className="text-[var(--text-secondary)] text-lg">
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <TextGenerateEffect 
+              words={`Send Message to @${username}`}
+              className="text-4xl md:text-5xl font-bold text-gradient"
+              duration={2}
+            />
+          </motion.div>
+          
+          <motion.p 
+            className="text-[var(--text-secondary)] text-lg"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+          >
             Your message will be completely anonymous
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
         {/* Message Composer */}
-        <GlassCard variant="medium" accentEdge="top" accentColor="primary" className="p-6 md:p-8 space-y-6">
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Textarea */}
-            <div className="relative">
-              <textarea
-                {...form.register('content')}
-                placeholder="Write your anonymous message here..."
-                rows={6}
-                disabled={isLoading}
-                className={cn(
-                  'w-full px-4 py-3 rounded-[var(--ui-radius-md)]',
-                  'bg-white/[0.05] border-2 border-white/[0.12]',
-                  'backdrop-blur-[var(--blur-subtle)]',
-                  'text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]',
-                  'transition-all duration-[var(--motion-fast)]',
-                  'focus:outline-none focus:border-[oklch(0.70_0.22_260)] focus:bg-white/[0.08]',
-                  'focus:shadow-[0_0_0_4px_oklch(0.70_0.22_260_/_0.1)]',
-                  'disabled:opacity-50 disabled:cursor-not-allowed',
-                  'resize-none',
-                  form.formState.errors.content && 'border-[oklch(0.65_0.25_25)]'
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.8 }}
+        >
+          <AceternityCard
+            variant="glass" 
+            accentEdge="top" 
+            className="p-6 md:p-8 space-y-6"
+            tiltOnHover
+          >
+            <motion.form 
+              onSubmit={form.handleSubmit(onSubmit)} 
+              className="space-y-6"
+            >
+              {/* Textarea */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.9 }}
+                className="relative"
+              >
+                <motion.textarea
+                  {...form.register('content')}
+                  placeholder="Write your anonymous message here..."
+                  rows={6}
+                  disabled={isLoading}
+                  whileFocus={{ scale: 1.01 }}
+                  className={cn(
+                    'w-full px-4 py-3 rounded-[var(--radius-md)]',
+                    'glass border-2 border-white/[0.12]',
+                    'text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]',
+                    'transition-all duration-[var(--motion-fast)]',
+                    'focus:outline-none focus:border-[var(--color-primary-mid)] focus:bg-white/[0.08]',
+                    'focus:shadow-[0_0_0_4px_var(--color-primary-mid)_/_0.1)]',
+                    'disabled:opacity-50 disabled:cursor-not-allowed',
+                    'resize-none',
+                    form.formState.errors.content && 'border-[var(--color-accent-error)]'
+                  )}
+                />
+                {form.formState.errors.content && (
+                  <motion.p 
+                    className="mt-2 text-sm text-[var(--color-accent-error)]"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    {form.formState.errors.content.message}
+                  </motion.p>
                 )}
-              />
-              {form.formState.errors.content && (
-                <p className="mt-2 text-sm text-[oklch(0.65_0.25_25)] animate-in slide-in-from-top-1">
-                  {form.formState.errors.content.message}
-                </p>
-              )}
-            </div>
+              </motion.div>
 
-            {/* Actions */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              <FancyButton
-                type="button"
-                onClick={fetchSuggestedMessages}
-                variant="outline"
-                size="lg"
-                disabled={isSuggestLoading}
-                className="flex-1 gap-2"
+              {/* Actions */}
+              <motion.div 
+                className="flex flex-col sm:flex-row gap-3"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 1.0 }}
               >
-                {isSuggestLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <Sparkles className="w-5 h-5" />
-                )}
-                AI Suggest
-              </FancyButton>
-              <FancyButton
-                type="submit"
-                variant="solid"
-                size="lg"
-                disabled={isLoading || !messageContent}
-                loading={isLoading}
-                className="flex-1 gap-2"
-              >
-                <Send className="w-5 h-5" />
-                Send Message
-              </FancyButton>
-            </div>
-          </form>
-        </GlassCard>
+                {/* AI Suggest */}
+                <motion.div
+                  whileHover={{ scale: isSuggestLoading ? 1 : 1.02 }}
+                  whileTap={{ scale: isSuggestLoading ? 1 : 0.98 }}
+                  className="flex-1"
+                >
+                  <FancyButton
+                    type="button"
+                    onClick={fetchSuggestedMessages}
+                    variant="gradient"
+                    size="lg"
+                    disabled={isSuggestLoading}
+                    className={cn(
+                      'w-full inline-flex items-center justify-center',
+                      'gap-3 px-5 py-2',
+                      'rounded-full min-h-[48px]',
+                      'whitespace-nowrap font-medium text-white',
+                      'shadow-[0_8px_24px_rgba(59,130,246,0.10)]',
+                      'transition-all duration-150 ease-in-out',
+                      'cursor-pointer'
+                    )}
+                    style={{
+                      // gradient consistent with your previous AI suggest
+                      background: 'linear-gradient(90deg,#7c6cff 0%,#28b1ff 100%)',
+                      filter: 'none',
+                    }}
+                    aria-label="AI Suggest"
+                  >
+                    {isSuggestLoading ? (
+                      <>
+                        <motion.span
+                          className="inline-flex items-center justify-center w-5 h-5"
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                          aria-hidden="true"
+                        >
+                          <Loader2 className="w-4 h-4" />
+                        </motion.span>
+                        <span className="leading-none">Suggesting…</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="inline-flex items-center justify-center w-5 h-5" aria-hidden="true">
+                          <Wand2 className="w-5 h-5" />
+                        </span>
+                        <span className="leading-none">AI Suggest</span>
+                      </>
+                    )}
+                  </FancyButton>
+                </motion.div>
+
+                {/* Send Message — made to visually match AI Suggest */}
+                <motion.div
+                  whileHover={{ scale: isLoading ? 1 : 1.02 }}
+                  whileTap={{ scale: isLoading ? 1 : 0.98 }}
+                  className="cursor-pointer flex-1"
+                >
+                  {(() => {
+                    const isDisabled = isLoading || !(messageContent && messageContent.toString().trim().length > 0);
+
+                    const enabledBg = 'linear-gradient(90deg,#7c6cff 0%,#28b1ff 100%)';
+                    const disabledBg = 'linear-gradient(90deg,#343a44 0%,#2a2f35 100%)';
+
+                    return (
+                      <FancyButton
+                        type="submit"
+                        variant="gradient"
+                        size="lg"
+                        disabled={isDisabled}
+                        {...(isLoading ? { loading: true } : {})}
+                        aria-label="Send message"
+                        className={cn(
+                          'w-full inline-flex items-center justify-center',
+                          'gap-3 px-5 py-2',
+                          'rounded-full min-h-[48px]',
+                          'whitespace-nowrap font-medium text-white',
+                          'shadow-[0_8px_24px_rgba(59,130,246,0.10)]',
+                          'transition-all duration-150 ease-in-out',
+                          'cursor-pointer'
+                        )}
+                        style={{
+                          background: isDisabled ? disabledBg : enabledBg,
+                          opacity: isDisabled ? 0.88 : 1,
+                          pointerEvents: isDisabled ? 'none' as const : 'auto' as const,
+                          filter: 'none',
+                        }}
+                      >
+                        {isLoading ? (
+                          <>
+                            <motion.span
+                              className="inline-flex items-center justify-center w-6 h-6"
+                              animate={{ rotate: 360 }}
+                              transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                              aria-hidden="true"
+                            >
+                              <Loader2 className="w-4 h-4" />
+                            </motion.span>
+
+                            <span className="flex-1 text-center leading-none">Sending…</span>
+
+                            <span className="inline-flex items-center justify-center w-6 h-6 opacity-0" aria-hidden="true">
+                              <ArrowRight className="w-4 h-4" />
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="inline-flex items-center justify-center w-6 h-6" aria-hidden="true">
+                              <Send className="w-5 h-5" />
+                            </span>
+
+                            <span className="flex-1 text-center leading-none">Send Message</span>
+
+                            <span className="inline-flex items-center justify-center w-6 h-6" aria-hidden="true">
+                              <ArrowRight className="w-4 h-4" />
+                            </span>
+                          </>
+                        )}
+                      </FancyButton>
+                    );
+                  })()}
+                </motion.div>
+              </motion.div>
+            </motion.form>
+          </AceternityCard>
+        </motion.div>
 
         {/* AI Suggestions */}
         {(completion !== initialMessageString || suggestError) && (
-          <GlassCard variant="medium" className="p-6 md:p-8 space-y-4">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-[oklch(0.75_0.18_220)]" />
-              <h3 className="text-lg font-bold text-[var(--text-primary)]">
-                Suggested Messages
-              </h3>
-            </div>
-            
-            {suggestError ? (
-              <div className="p-4 rounded-[var(--ui-radius-md)] bg-[oklch(0.65_0.25_25)]/10 border border-[oklch(0.65_0.25_25)]/30">
-                <p className="text-[oklch(0.65_0.25_25)] text-sm">{suggestError}</p>
-              </div>
-            ) : (
-              <div className="grid gap-3">
-                {parseStringMessages(completion)
-                  .filter((message) => message.trim().length > 0)
-                  .map((message, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleMessageClick(message)}
-                      className={cn(
-                        'p-4 rounded-[var(--ui-radius-md)] text-left',
-                        'bg-white/[0.05] border border-white/[0.08]',
-                        'hover:bg-white/[0.08] hover:border-white/[0.15]',
-                        'transition-all duration-[var(--motion-fast)]',
-                        'focus:outline-none focus-visible:ring-2 focus-visible:ring-[oklch(0.70_0.22_260)]',
-                        'text-[var(--text-primary)]'
-                      )}
-                    >
-                      {message}
-                    </button>
-                  ))}
-              </div>
-            )}
-            <p className="text-[var(--text-tertiary)] text-sm">
-              Click any suggestion to use it as your message
-            </p>
-          </GlassCard>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 1.2 }}
+          >
+            <AceternityCard 
+              variant="gradient" 
+              accentEdge="left" 
+              className="p-6 md:p-8 space-y-4"
+              floatOnHover
+            >
+              <motion.div 
+                className="flex items-center gap-2"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 1.3 }}
+              >
+                <motion.div
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    rotate: [0, 360],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    repeatDelay: 2,
+                  }}
+                >
+                  <Sparkles className="w-5 h-5 text-[var(--color-accent-mint)]" />
+                </motion.div>
+                <motion.h3 
+                  className="text-lg font-bold text-gradient mb-2"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  Suggested Messages
+                </motion.h3>
+              </motion.div>
+              
+              {suggestError ? (
+                <motion.div 
+                  className="p-4 rounded-[var(--radius-md)] glass border border-[var(--color-accent-error)]/30"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <p className="text-[var(--color-accent-error)] text-sm">{suggestError}</p>
+                </motion.div>
+              ) : (
+                <motion.div 
+                  className="grid gap-3"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.1, delay: 0.1 }}
+                >
+                  {parseStringMessages(completion)
+                    .filter((message) => message.trim().length > 0)
+                    .map((message, index) => (
+                      <motion.button
+                        key={index}
+                        onClick={() => handleMessageClick(message)}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.1, delay: 0.1 + index * 0.1 }}
+                        whileHover={{ scale: 1.03, x: 5 }}
+                        whileTap={{ scale: 0.98 }}
+                        className={cn(
+                          'p-4 rounded-[var(--radius-md)] text-left',
+                          'glass border border-white/15',
+                          'hover:bg-white/[0.08] hover:border-[var(--color-primary-mid)]/30',
+                          'transition-all duration-var(--motion-fast)',
+                          'focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-mid)]',
+                          'text-[var(--text-primary)]',
+                          'cursor-pointer'
+                        )}
+                      >
+                        {message}
+                      </motion.button>
+                    ))}
+                </motion.div>
+              )}
+              <motion.p 
+                className="text-[var(--text-tertiary)] text-sm mt-2"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 1.6 }}
+              >
+                Click any suggestion to use it as your message
+              </motion.p>
+            </AceternityCard>
+          </motion.div>
         )}
 
         {/* CTA */}
-        <GlassCard variant="subtle" className="p-6 md:p-8 text-center space-y-4">
-          <h3 className="text-xl font-bold text-[var(--text-primary)]">
-            Want your own message board?
-          </h3>
-          <p className="text-[var(--text-secondary)]">
-            Create your account and start receiving anonymous messages
-          </p>
-          <Link href="/sign-up">
-            <FancyButton variant="warm" size="lg">
-              Create Your Account
-            </FancyButton>
-          </Link>
-        </GlassCard>
-      </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 1.8 }}
+        >
+          <AceternityCard 
+            variant="gradient" 
+            accentEdge="bottom" 
+            className="p-6 md:p-8 text-center space-y-4"
+            tiltOnHover
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 1.9 }}
+            >
+              <motion.h3 
+                className="text-xl font-bold text-gradient"
+                whileHover={{ scale: 1.05 }}
+              >
+                Want your own message board?
+              </motion.h3>
+            </motion.div>
+            
+            <motion.p 
+              className="text-[var(--text-secondary)] m-1"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 2.0 }}
+            >
+              Create your account and start receiving anonymous messages
+            </motion.p>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 2.1 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Link href="/sign-up">
+  <FancyButton
+    variant="gradient"
+    size="lg"
+    className={cn(
+      'inline-flex items-center justify-center gap-3 px-6 py-2',   // spacing
+      'rounded-full min-h-[48px] whitespace-nowrap',              // pill shape
+      'font-medium text-white text-base',                         // typography
+      'shadow-[0_8px_24px_rgba(59,130,246,0.10)]',
+      'transition-all duration-150 ease-in-out',
+      // allow animated icon to grow without being clipped
+      'overflow-visible bg-clip-padding',
+      'cursor-pointer'
+    )}
+    style={{
+      background: 'linear-gradient(90deg,#7c6cff 0%,#28b1ff 100%)',
+      filter: 'none',
+    }}
+    aria-label="Create your account"
+  >
+    {/* Animated icon — only this element animates.
+        Use a fixed-size inline-flex box so it doesn't change the label layout. */}
+    <motion.span
+      className="inline-flex items-center justify-center w-6 h-6 flex-shrink-0"
+      animate={{ scale: [1, 1.18, 1], rotate: [0, -8, 8, 0] }}
+      transition={{ duration: 2.4, repeat: Infinity, repeatDelay: 2, ease: 'easeInOut' }}
+      style={{ transformOrigin: 'center' }}
+      aria-hidden="true"
+    >
+      <UserPlus className="w-4 h-4" />
+    </motion.span>
+
+    {/* Label stays centered and never moves */}
+    <span className="leading-none">Create Your Account</span>
+
+    {/* Right arrow — static so it doesn't affect centering */}
+    <span className="inline-flex items-center justify-center w-5 h-5 flex-shrink-0" aria-hidden="true">
+      <ArrowRight className="w-4 h-4" />
+    </span>
+  </FancyButton>
+</Link>
+
+            </motion.div>
+          </AceternityCard>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }

@@ -13,7 +13,7 @@ const AnimatedBackground = dynamic(
 export function ClientLayout({ children }: { children: React.ReactNode }) {
   return (
     <Providers>
-      <AnimatedBackground />
+      <AnimatedBackground variant="combined" showRadialGradient />
       {children}
       <ToastProvider />
     </Providers>

@@ -1,26 +1,38 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { AuroraBackground } from './aceternity/AuroraBackground';
+import { BackgroundBeams, ShootingStars } from './aceternity/BackgroundBeams';
 
 export interface AnimatedBackgroundProps {
   powerSaver?: boolean;
+  variant?: 'original' | 'aurora' | 'beams' | 'shooting-stars' | 'combined';
+  showRadialGradient?: boolean;
 }
 
 /**
- * AnimatedBackground - Layered ambient background with morphing gradients and blobs
+ * AnimatedBackground - Enhanced background with Aceternity effects
  * 
- * Renders three non-blocking layers:
- * 1. Slow-morphing gradient sheet with hue rotation
- * 2. Oversized blurred SVG blobs with parallax
- * 3. Optional particle/wireframe mesh (disabled in power saver mode)
+ * Renders multiple background variants:
+ * 1. Original: Slow-morphing gradients and blobs
+ * 2. Aurora: Animated aurora background effect
+ * 3. Beams: Background beams with collision
+ * 4. Shooting Stars: Animated shooting stars
+ * 5. Combined: Multiple effects layered together
  * 
  * @example
  * ```tsx
- * <AnimatedBackground powerSaver={false} />
+ * <AnimatedBackground variant="aurora" showRadialGradient />
+ * <AnimatedBackground variant="combined" />
  * ```
  */
-export function AnimatedBackground({ powerSaver = false }: AnimatedBackgroundProps) {
+export function AnimatedBackground({ 
+  powerSaver = false, 
+  variant = 'combined',
+  showRadialGradient = true 
+}: AnimatedBackgroundProps) {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [scrollY, setScrollY] = useState(0);
   const rafRef = useRef<number | undefined>(undefined);
@@ -75,6 +87,61 @@ export function AnimatedBackground({ powerSaver = false }: AnimatedBackgroundPro
     );
   }
 
+  // Aurora variant
+  if (variant === 'aurora') {
+    return (
+      <AuroraBackground showRadialGradient={showRadialGradient} className="fixed inset-0 -z-10 pointer-events-none" />
+    );
+  }
+
+  // Beams variant
+  if (variant === 'beams') {
+    return (
+      <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
+        <BackgroundBeams />
+      </div>
+    );
+  }
+
+  // Shooting stars variant
+  if (variant === 'shooting-stars') {
+    return (
+      <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[var(--bg-deep)] via-[oklch(0.15_0.04_265)] to-[var(--bg-surface)]" />
+        <ShootingStars starCount={8} />
+      </div>
+    );
+  }
+
+  // Combined variant with multiple Aceternity effects
+  if (variant === 'combined') {
+    return (
+      <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
+        {/* Base gradient layer */}
+        <div
+          className={cn(
+            'absolute inset-0',
+            'bg-gradient-to-br from-[var(--bg-deep)] via-[oklch(0.15_0.04_265)] to-[var(--bg-surface)]',
+          )}
+          style={{
+            transform: `translate3d(${mousePos.x * 0.5}px, ${mousePos.y * 0.5}px, 0)`,
+            transition: 'transform 0.3s ease-out',
+          }}
+        />
+        
+        {/* Aurora effect */}
+        <AuroraBackground showRadialGradient={false} className="absolute inset-0 opacity-30" />
+        
+        {/* Background beams */}
+        <BackgroundBeams className="opacity-20" />
+        
+        {/* Shooting stars */}
+        <ShootingStars starCount={3} />
+      </div>
+    );
+  }
+
+  // Original variant (existing implementation)
   return (
     <div
       className="fixed inset-0 -z-10 pointer-events-none overflow-hidden"
