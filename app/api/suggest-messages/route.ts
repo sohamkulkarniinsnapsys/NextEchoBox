@@ -50,8 +50,7 @@ export async function POST(req: Request) {
     // allow override of prompt via request body, otherwise use default prompt
     const prompt =
       (body?.prompt as string) ||
-      "Create a list of three open-ended and engaging questions formatted as a single string. Each question should be separated by '||'. These questions are for an anonymous social messaging platform, like Qooh.me, and should be suitable for a diverse audience. Avoid personal or sensitive topics, focusing instead on universal themes that encourage friendly interaction. For example, your output should be structured like this: 'What’s a hobby you’ve recently started?||If you could have dinner with any historical figure, who would it be?||What’s a simple thing that makes you happy?'. Ensure the questions are intriguing, foster curiosity, and contribute to a positive and welcoming conversational environment.";
-
+      "Create a list of three open-ended and engaging questions formatted as a single string. Each question should be separated by '||'. These questions are for an anonymous social messaging platform, like Qooh.me, and should be suitable for a diverse audience. Avoid personal or sensitive topics, focusing instead on universal themes that encourage playful and lighthearted interaction. The questions should be sarcastic, witty, or humorously thought-provoking while maintaining a friendly and positive tone. For example, your output should be structured like this: 'If laziness were an Olympic sport, what medal would you win?||What’s a life skill you thought you’d never need but totally do?||If your pet could talk, what embarrassing story would it tell about you?'. Ensure the questions are funny, clever, and encourage entertaining and imaginative responses.";
     const API_KEY = process.env.GOOGLE_API_KEY;
     if (!API_KEY) {
       return NextResponse.json(
