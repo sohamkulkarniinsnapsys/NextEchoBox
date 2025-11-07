@@ -1,0 +1,157 @@
+/**
+ * Design Tokens - Cinematic Premium Theme
+ * 
+ * This file defines the foundational design tokens for the application.
+ * All values use CSS Custom Properties for maximum flexibility and theming.
+ */
+
+:root {
+  /* === COLOR PALETTE === */
+  /* Primary Gradient: Violet → Aqua */
+  --color-primary-start: oklch(0.65 0.25 280);      /* Deep violet */
+  --color-primary-mid: oklch(0.70 0.22 260);        /* Purple-blue */
+  --color-primary-end: oklch(0.75 0.18 220);        /* Aqua blue */
+  
+  /* Accent Colors */
+  --color-accent-warm: oklch(0.72 0.20 35);         /* Coral */
+  --color-accent-gold: oklch(0.80 0.15 85);         /* Sun gold */
+  --color-accent-mint: oklch(0.78 0.16 165);        /* Mint green */
+  
+  /* Background Colors */
+  --bg-deep: oklch(0.12 0.04 265);                  /* Deep indigo */
+  --bg-surface: oklch(0.18 0.03 265);               /* Surface indigo */
+  --bg-elevated: oklch(0.22 0.03 265);              /* Elevated surface */
+  
+  /* Glass & Transparency */
+  --glass-alpha: 0.08;
+  --glass-border-alpha: 0.15;
+  --glass-highlight-alpha: 0.05;
+  
+  /* Text Colors */
+  --text-primary: oklch(0.98 0.01 265);             /* Near white */
+  --text-secondary: oklch(0.75 0.05 265);           /* Muted light */
+  --text-tertiary: oklch(0.55 0.05 265);            /* Subtle */
+  --text-inverse: oklch(0.15 0.04 265);             /* Dark text */
+  
+  /* === BLUR & EFFECTS === */
+  --blur-subtle: 8px;
+  --blur-medium: 16px;
+  --blur-strong: 32px;
+  --blur-extreme: 64px;
+  
+  /* === RADII === */
+  --ui-radius-sm: 8px;
+  --ui-radius-md: 12px;
+  --ui-radius-lg: 16px;
+  --ui-radius-xl: 24px;
+  --ui-radius-full: 9999px;
+  
+  /* === ELEVATION & SHADOWS === */
+  --shadow-elev-1: 0 2px 8px oklch(0 0 0 / 0.08),
+                   0 1px 2px oklch(0 0 0 / 0.12);
+  --shadow-elev-2: 0 4px 16px oklch(0 0 0 / 0.12),
+                   0 2px 4px oklch(0 0 0 / 0.16);
+  --shadow-elev-3: 0 8px 32px oklch(0 0 0 / 0.16),
+                   0 4px 8px oklch(0 0 0 / 0.20);
+  --shadow-glow: 0 0 24px oklch(0.65 0.25 280 / 0.3),
+                 0 0 48px oklch(0.75 0.18 220 / 0.2);
+  --shadow-glow-warm: 0 0 24px oklch(0.72 0.20 35 / 0.3),
+                      0 0 48px oklch(0.80 0.15 85 / 0.2);
+  
+  /* === MOTION === */
+  --motion-instant: 0ms;
+  --motion-fast: 150ms;
+  --motion-medium: 320ms;
+  --motion-slow: 520ms;
+  --motion-page: 800ms;
+  
+  /* Easing Functions */
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-elastic: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  
+  /* === SPACING === */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+  
+  /* === TYPOGRAPHY === */
+  --font-display: 'Geist', 'Inter', system-ui, sans-serif;
+  --font-body: 'Geist', 'Inter', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', 'Fira Code', monospace;
+  
+  /* Font Sizes */
+  --text-xs: 0.75rem;      /* 12px */
+  --text-sm: 0.875rem;     /* 14px */
+  --text-base: 1rem;       /* 16px */
+  --text-lg: 1.125rem;     /* 18px */
+  --text-xl: 1.25rem;      /* 20px */
+  --text-2xl: 1.5rem;      /* 24px */
+  --text-3xl: 1.875rem;    /* 30px */
+  --text-4xl: 2.25rem;     /* 36px */
+  --text-5xl: 3rem;        /* 48px */
+  --text-6xl: 3.75rem;     /* 60px */
+  
+  /* Font Weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  
+  /* Line Heights */
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+  
+  /* === Z-INDEX === */
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-toast: 700;
+  --z-tooltip: 800;
+}
+
+/* === REDUCED MOTION === */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-medium: 0ms;
+    --motion-slow: 0ms;
+    --motion-page: 0ms;
+  }
+}
+
+/* === HIGH CONTRAST MODE === */
+@media (prefers-contrast: high) {
+  :root {
+    --glass-alpha: 0.15;
+    --glass-border-alpha: 0.30;
+    --text-secondary: oklch(0.85 0.05 265);
+    --blur-subtle: 4px;
+    --blur-medium: 8px;
+    --blur-strong: 16px;
+  }
+}
+
+/* === POWER SAVER MODE (Custom Data Attribute) === */
+[data-power-saver="true"] {
+  --motion-fast: 0ms;
+  --motion-medium: 0ms;
+  --motion-slow: 0ms;
+  --motion-page: 0ms;
+  --blur-subtle: 0px;
+  --blur-medium: 0px;
+  --blur-strong: 0px;
+  --blur-extreme: 0px;
+  --shadow-glow: none;
+  --shadow-glow-warm: none;
+}

@@ -42,3 +42,7 @@ next-env.d.ts
 1.txt
 
 RESEND_EMAIL_SETUP.md
+FRONTEND_RESKIN_README.md
+RESKIN_SUMMARY.md
+design/migration_checklist.md
+design/visual-spec.md

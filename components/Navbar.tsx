@@ -4,7 +4,9 @@
 import React from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
-import { Button } from '@/components/ui/button';
+import { FancyButton } from '@/components/ui/FancyButton';
+import { AnimatedAvatar } from '@/components/ui/AnimatedAvatar';
+import { LogOut, Sparkles } from 'lucide-react';
 
 export default function Navbar() {
   const { data: session, status } = useSession();
@@ -12,30 +14,61 @@ export default function Navbar() {
   const displayName = user?.username ?? user?.email ?? 'User';
 
   return (
-    <nav className="p-4 md:p-6 shadow-md bg-gray-900 text-white">
-      <div className="container mx-auto flex flex-col md:flex-row justify-between items-center">
-        <Link href="/" className="text-xl font-bold mb-4 md:mb-0">
+    <nav className="fixed top-0 left-0 right-0 z-[var(--z-fixed)] px-4 md:px-6 py-4">
+      <div 
+        className="container mx-auto max-w-7xl
+          bg-[var(--bg-surface)]/80 backdrop-blur-[var(--blur-strong)]
+          border border-white/[0.12] rounded-[var(--ui-radius-lg)]
+          shadow-[var(--shadow-elev-2)]
+          px-4 md:px-6 py-3
+          flex flex-col md:flex-row justify-between items-center gap-4
+          transition-all duration-[var(--motion-medium)]"
+      >
+        {/* Brand */}
+        <Link 
+          href="/" 
+          className="flex items-center gap-2 text-xl font-bold text-[var(--text-primary)]
+            hover:scale-105 transition-transform duration-[var(--motion-fast)]
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-[oklch(0.70_0.22_260)] rounded-md px-2"
+        >
+          <Sparkles className="w-5 h-5 text-[oklch(0.75_0.18_220)]" />
           NextEchoBox
         </Link>
 
-        <div className="flex items-center gap-4 w-full md:w-auto">
+        {/* Actions */}
+        <div className="flex items-center gap-4 w-full md:w-auto justify-center md:justify-end">
           {status === 'loading' ? (
-            <span className="mr-4">Loading...</span>
+            <span className="text-[var(--text-secondary)] text-sm">Loading...</span>
           ) : session ? (
             <>
-              <span className="mr-4">Welcome, {displayName}</span>
-              <Button
+              {/* User info */}
+              <div className="hidden md:flex items-center gap-3">
+                <AnimatedAvatar
+                  src={user?.image}
+                  alt={displayName}
+                  size="md"
+                />
+                <span className="text-[var(--text-primary)] font-medium">
+                  {displayName}
+                </span>
+              </div>
+              
+              {/* Logout button */}
+              <FancyButton
                 onClick={() => signOut({ callbackUrl: '/sign-in' })}
-                className="cursor-pointer w-full md:w-auto bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                variant="outline"
+                size="sm"
+                className="w-full md:w-auto"
               >
-                Logout
-              </Button>
+                <LogOut className="w-4 h-4" />
+                <span className="md:inline">Logout</span>
+              </FancyButton>
             </>
           ) : (
             <Link href="/sign-in" className="w-full md:w-auto">
-              <Button className="w-full md:w-auto bg-slate-100 text-black" variant="outline">
+              <FancyButton variant="solid" size="sm" className="w-full md:w-auto">
                 Login
-              </Button>
+              </FancyButton>
             </Link>
           )}
         </div>

@@ -4,26 +4,16 @@ import React, { useState } from 'react';
 import axios, { AxiosError } from 'axios';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { CardHeader, CardContent, Card } from '@/components/ui/card';
-// Removed useCompletion - using simple fetch instead
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Textarea } from '@/components/ui/textarea';
+import { Loader2, Send, Sparkles, MessageCircle } from 'lucide-react';
+import { FancyButton } from '@/components/ui/FancyButton';
+import { GlassCard } from '@/components/ui/GlassCard';
 import { toast } from 'sonner';
 import * as z from 'zod';
 import { ApiResponse } from '@/types/ApiResponse';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { messageSchema } from '@/schemas/messageSchema';
+import { cn } from '@/lib/utils';
 
 const specialChar = '||';
 
@@ -110,87 +100,141 @@ export default function SendMessage() {
   };
 
   return (
-    <div className="container mx-auto my-8 p-6 bg-white rounded max-w-4xl">
-      <h1 className="text-4xl font-bold mb-6 text-center">
-        Public Profile Link
-      </h1>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="content"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Send Anonymous Message to @{username}</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Write your anonymous message here"
-                    className="resize-none"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <div className="min-h-screen flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-2xl space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-4">
           <div className="flex justify-center">
-            {isLoading ? (
-              <Button disabled>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Please wait
-              </Button>
-            ) : (
-              <Button type="submit" disabled={isLoading || !messageContent}>
-                Send It
-              </Button>
-            )}
+            <div className="p-4 rounded-full bg-gradient-to-br from-[oklch(0.65_0.25_280)] to-[oklch(0.75_0.18_220)]">
+              <MessageCircle className="w-10 h-10 text-white" />
+            </div>
           </div>
-        </form>
-      </Form>
-
-      <div className="space-y-4 my-8">
-        <div className="space-y-2">
-          <Button
-            onClick={fetchSuggestedMessages}
-            className="my-4"
-            disabled={isSuggestLoading}
-          >
-            Suggest Messages
-          </Button>
-          <p>Click on any message below to select it.</p>
+          <h1 className="text-4xl md:text-5xl font-bold text-[var(--text-primary)]">
+            Send Message to <span className="bg-gradient-to-r from-[oklch(0.65_0.25_280)] via-[oklch(0.70_0.22_260)] to-[oklch(0.75_0.18_220)] bg-clip-text text-transparent">@{username}</span>
+          </h1>
+          <p className="text-[var(--text-secondary)] text-lg">
+            Your message will be completely anonymous
+          </p>
         </div>
-        <Card>
-          <CardHeader>
-            <h3 className="text-xl font-semibold">Messages</h3>
-          </CardHeader>
-          <CardContent className="flex flex-col space-y-4">
+
+        {/* Message Composer */}
+        <GlassCard variant="medium" accentEdge="top" accentColor="primary" className="p-6 md:p-8 space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Textarea */}
+            <div className="relative">
+              <textarea
+                {...form.register('content')}
+                placeholder="Write your anonymous message here..."
+                rows={6}
+                disabled={isLoading}
+                className={cn(
+                  'w-full px-4 py-3 rounded-[var(--ui-radius-md)]',
+                  'bg-white/[0.05] border-2 border-white/[0.12]',
+                  'backdrop-blur-[var(--blur-subtle)]',
+                  'text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]',
+                  'transition-all duration-[var(--motion-fast)]',
+                  'focus:outline-none focus:border-[oklch(0.70_0.22_260)] focus:bg-white/[0.08]',
+                  'focus:shadow-[0_0_0_4px_oklch(0.70_0.22_260_/_0.1)]',
+                  'disabled:opacity-50 disabled:cursor-not-allowed',
+                  'resize-none',
+                  form.formState.errors.content && 'border-[oklch(0.65_0.25_25)]'
+                )}
+              />
+              {form.formState.errors.content && (
+                <p className="mt-2 text-sm text-[oklch(0.65_0.25_25)] animate-in slide-in-from-top-1">
+                  {form.formState.errors.content.message}
+                </p>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <FancyButton
+                type="button"
+                onClick={fetchSuggestedMessages}
+                variant="outline"
+                size="lg"
+                disabled={isSuggestLoading}
+                className="flex-1 gap-2"
+              >
+                {isSuggestLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Sparkles className="w-5 h-5" />
+                )}
+                AI Suggest
+              </FancyButton>
+              <FancyButton
+                type="submit"
+                variant="solid"
+                size="lg"
+                disabled={isLoading || !messageContent}
+                loading={isLoading}
+                className="flex-1 gap-2"
+              >
+                <Send className="w-5 h-5" />
+                Send Message
+              </FancyButton>
+            </div>
+          </form>
+        </GlassCard>
+
+        {/* AI Suggestions */}
+        {(completion !== initialMessageString || suggestError) && (
+          <GlassCard variant="medium" className="p-6 md:p-8 space-y-4">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-[oklch(0.75_0.18_220)]" />
+              <h3 className="text-lg font-bold text-[var(--text-primary)]">
+                Suggested Messages
+              </h3>
+            </div>
+            
             {suggestError ? (
-              <p className="text-red-500">{suggestError}</p>
-            ) : isSuggestLoading ? (
-              <p className="text-gray-500">Loading suggestions...</p>
+              <div className="p-4 rounded-[var(--ui-radius-md)] bg-[oklch(0.65_0.25_25)]/10 border border-[oklch(0.65_0.25_25)]/30">
+                <p className="text-[oklch(0.65_0.25_25)] text-sm">{suggestError}</p>
+              </div>
             ) : (
-              parseStringMessages(completion)
-                .filter((message) => message.trim().length > 0)
-                .map((message, index) => (
-                  <Button
-                    key={index}
-                    variant="outline"
-                    className="mb-2"
-                    onClick={() => handleMessageClick(message)}
-                  >
-                    {message}
-                  </Button>
-                ))
+              <div className="grid gap-3">
+                {parseStringMessages(completion)
+                  .filter((message) => message.trim().length > 0)
+                  .map((message, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleMessageClick(message)}
+                      className={cn(
+                        'p-4 rounded-[var(--ui-radius-md)] text-left',
+                        'bg-white/[0.05] border border-white/[0.08]',
+                        'hover:bg-white/[0.08] hover:border-white/[0.15]',
+                        'transition-all duration-[var(--motion-fast)]',
+                        'focus:outline-none focus-visible:ring-2 focus-visible:ring-[oklch(0.70_0.22_260)]',
+                        'text-[var(--text-primary)]'
+                      )}
+                    >
+                      {message}
+                    </button>
+                  ))}
+              </div>
             )}
-          </CardContent>
-        </Card>
-      </div>
-      <Separator className="my-6" />
-      <div className="text-center">
-        <div className="mb-4">Get Your Message Board</div>
-        <Link href={'/sign-up'}>
-          <Button>Create Your Account</Button>
-        </Link>
+            <p className="text-[var(--text-tertiary)] text-sm">
+              Click any suggestion to use it as your message
+            </p>
+          </GlassCard>
+        )}
+
+        {/* CTA */}
+        <GlassCard variant="subtle" className="p-6 md:p-8 text-center space-y-4">
+          <h3 className="text-xl font-bold text-[var(--text-primary)]">
+            Want your own message board?
+          </h3>
+          <p className="text-[var(--text-secondary)]">
+            Create your account and start receiving anonymous messages
+          </p>
+          <Link href="/sign-up">
+            <FancyButton variant="warm" size="lg">
+              Create Your Account
+            </FancyButton>
+          </Link>
+        </GlassCard>
       </div>
     </div>
   );
