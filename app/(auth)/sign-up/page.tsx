@@ -380,15 +380,15 @@ export default function SignUpForm() {
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 1.45 }}
+            transition={{ duration: 0.2, delay: 0.1 }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
             <FancyButton
               type="button"
-              variant="neon"
+              variant="gradient"
               size="lg"
-              className="cursor-pointer w-full gap-3 min-h-[48px] px-6 flex items-center justify-center"
+              className="cursor-pointer w-full gap-3 min-h-12 px-6 flex items-center justify-center"
               onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
               style={{
                 display: 'inline-flex',
@@ -423,14 +423,14 @@ export default function SignUpForm() {
             transition={{ duration: 0.5, delay: 1.7 }}
           >
             <p className="text-[var(--text-secondary)]">
-              Not a member yet?{' '}
+              Already a member?{' '}
               <motion.span
                 className="inline-block"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Link href="/sign-up" className="text-gradient font-medium hover:underline">
-                  Sign up
+                <Link href="/sign-in" className="text-gradient font-medium hover:underline">
+                  Sign in
                 </Link>
               </motion.span>
             </p>

@@ -111,7 +111,7 @@ export default function SignInForm() {
               transition={{ duration: 0.5, delay: 0.4 }}
             >
               <TextGenerateEffect
-                words="Welcome Back"
+                words="Welcome..."
                 className="text-3xl md:text-4xl font-bold text-gradient"
                 duration={2}
               />
@@ -221,15 +221,15 @@ export default function SignInForm() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 1.3 }}
+            transition={{ duration: 0.2, delay: 0.1 }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
             <FancyButton
               type="button"
-              variant="neon"
+              variant="gradient"
               size="lg"
-              className="cursor-pointer w-full gap-3 flex items-center justify-center min-h-[48px]"
+              className="cursor-pointer w-full gap-3 flex items-center justify-center min-h-12"
               onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
             >
               <motion.span
