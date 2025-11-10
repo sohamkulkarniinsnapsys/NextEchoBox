@@ -428,7 +428,14 @@ function UserDashboard() {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 1.0 }}
             >
-              {profileUrl}
+              <a 
+                href={profileUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:underline text-blue-500"
+              >
+                {profileUrl}
+              </a>
             </motion.code>
           </motion.div>
           
