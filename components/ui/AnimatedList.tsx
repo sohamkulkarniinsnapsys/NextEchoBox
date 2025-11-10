@@ -1,7 +1,7 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
+import { motion, Variants, Transition } from 'framer-motion';
 
 interface AnimatedListProps {
   children: ReactNode;
@@ -15,78 +15,72 @@ interface AnimatedListItemProps {
   delay?: number;
 }
 
-const listVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
+const baseItemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.5,
-      ease: 'easeOut' as const,
+      duration: 0.45,
+      ease: 'easeOut' as any,
     },
   },
 };
 
-export function AnimatedList({ 
-  children, 
-  className = '', 
-  staggerDelay = 0.1 
-}: AnimatedListProps) {
+export function AnimatedListItem({
+  children,
+  className = '',
+  delay = 0,
+}: AnimatedListItemProps) {
+  const transitionWithDelay: Transition = {
+    duration: 0.45,
+    ease: 'easeOut' as any,
+    delay,
+  };
+
+  const itemVariants: Variants = {
+    hidden: baseItemVariants.hidden,
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: transitionWithDelay,
+    },
+  };
+
   return (
     <motion.div
       className={className}
       initial="hidden"
       animate="visible"
-      variants={{
-        ...listVariants,
-        visible: {
-          ...listVariants.visible,
-          transition: {
-            staggerChildren: staggerDelay,
-          },
-        },
-      }}
+      variants={itemVariants}
     >
       {children}
     </motion.div>
   );
 }
 
-export function AnimatedListItem({ 
-  children, 
-  className = '', 
-  delay = 0 
-}: AnimatedListItemProps) {
+export function AnimatedList({
+  children,
+  className = '',
+  staggerDelay = 0.1,
+}: AnimatedListProps) {
+  const items = React.Children.toArray(children);
+
   return (
-    <motion.div
-      className={className}
-      variants={{
-        ...itemVariants,
-        visible: {
-          ...itemVariants.visible,
-          transition: {
-            ...itemVariants.visible.transition,
-            delay,
-          },
-        },
-      }}
-    >
-      {children}
-    </motion.div>
+    <div className={className}>
+      {items.map((child, i) => {
+        const delay = i * staggerDelay;
+        const key = (child as any)?.key ?? `alist-${i}`;
+        return (
+          <AnimatedListItem key={String(key)} delay={delay}>
+            {child}
+          </AnimatedListItem>
+        );
+      })}
+    </div>
   );
 }
 
-// Preset animations for different list types
 export const slideInListVariants = {
   hidden: { opacity: 0 },
   visible: {

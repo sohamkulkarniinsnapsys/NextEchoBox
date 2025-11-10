@@ -13,7 +13,7 @@ import { motion } from 'framer-motion';
 import { Loader2, RefreshCcw, Copy, Check, MessageSquare, BarChart3, Link as LinkIcon, Sparkles } from 'lucide-react';
 import { User } from 'next-auth';
 import { useSession } from 'next-auth/react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { AcceptMessageSchema } from '@/schemas/acceptMessageSchema';
 import { cn } from '@/lib/utils';
@@ -23,15 +23,17 @@ import { AuroraBackground } from '@/components/ui/aceternity/AuroraBackground';
 import { AnimatedList, AnimatedListItem } from '@/components/ui/AnimatedList';
 
 function UserDashboard() {
+  const POLL_INTERVAL_MS = 5000;
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSwitchLoading, setIsSwitchLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  const prevMessagesRef = useRef<Message[]>([]);
+
   const handleDeleteMessage = (messageId: string) => {
-    setMessages(
-      messages.filter((message) => message._id.toString() !== messageId)
-    );
+    setMessages((prev) => prev.filter((message) => message._id.toString() !== messageId));
   };
 
   const { data: session } = useSession();
@@ -63,37 +65,81 @@ function UserDashboard() {
   }, [setValue]);
 
   const fetchMessages = useCallback(
-    async (refresh: boolean = false) => {
-      setIsLoading(true);
-      setIsSwitchLoading(false);
-      try {
-        const response = await axios.get<ApiResponse>('/api/get-messages');
-        setMessages((response.data.messages as Message[]) || []);
-
-        if (refresh) {
-          toast.success('Showing latest messages');
-        }
-      } catch (error) {
-        const axiosError = error as AxiosError<ApiResponse>;
-        toast.error(
-          axiosError.response?.data.message ?? 'Failed to fetch messages'
-        );
-      } finally {
-        setIsLoading(false);
+    async (refresh: boolean = false, silent: boolean = false) => {
+      if (!silent) {
+        setIsLoading(true);
         setIsSwitchLoading(false);
       }
+
+      try {
+        const response = await axios.get<ApiResponse>('/api/get-messages');
+        const newMessages = (response.data.messages as Message[]) || [];
+
+        setMessages((prev) => {
+          const prevStr = JSON.stringify(prev.map((m) => m._id));
+          const newStr = JSON.stringify(newMessages.map((m) => m._id));
+
+          const changed = prevStr !== newStr;
+
+          if (refresh) {
+            toast.success('Showing latest messages');
+          } else if (silent && changed) {
+            const prevLen = prev.length;
+            const newLen = newMessages.length;
+            if (newLen > prevLen) {
+              const diff = newLen - prevLen;
+              toast.success(`${diff} new message${diff > 1 ? 's' : ''}`);
+            } else {
+              toast('Messages updated');
+            }
+          }
+
+          prevMessagesRef.current = newMessages;
+          return newMessages;
+        });
+      } catch (error) {
+        const axiosError = error as AxiosError<ApiResponse>;
+        if (!silent) {
+          toast.error(
+            axiosError.response?.data.message ?? 'Failed to fetch messages'
+          );
+        }
+      } finally {
+        if (!silent) {
+          setIsLoading(false);
+          setIsSwitchLoading(false);
+        } else {
+          // ensure switch loading false even for silent fetches
+          setIsSwitchLoading(false);
+        }
+      }
     },
-    [] // State setters are stable, no deps needed
+    []
   );
 
-  // Fetch initial state from the server
   useEffect(() => {
     if (!session || !session.user) return;
 
-    fetchMessages();
+    // initial fetches
+    fetchMessages(false, false);
     fetchAcceptMessages();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.user?._id]); // Only re-fetch when user ID changes, not entire session object
+
+  }, [session?.user?._id]);
+
+  useEffect(() => {
+    if (!session || !session.user) return;
+
+    const intervalId = setInterval(() => {
+      fetchMessages(false, true);
+    }, POLL_INTERVAL_MS);
+
+    const immediateTimeout = setTimeout(() => fetchMessages(false, true), 2000);
+
+    return () => {
+      clearInterval(intervalId);
+      clearTimeout(immediateTimeout);
+    };
+  }, [session?.user?._id, fetchMessages]);
 
   // Handle switch change
   const handleSwitchChange = async () => {
@@ -118,6 +164,7 @@ function UserDashboard() {
 
   const { username } = session.user as User;
 
+  // safe in client component
   const baseUrl = `${window.location.protocol}//${window.location.host}`;
   const profileUrl = `${baseUrl}/u/${username}`;
 
@@ -454,18 +501,17 @@ function UserDashboard() {
                   className="cursor-pointer data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-[var(--color-primary-start)] data-[state=checked]:to-[var(--color-primary-end)]"
                 />
               </motion.div>
-              <motion.span
-      className="text-[var(--text-primary)] font-medium"
-      // ensure initial color is correct immediately
-      style={{ color: acceptMessages ? "var(--color-accent-mint)" : "#FF6B6B" }}
-      animate={
-        { color: acceptMessages ? "var(--color-accent-mint)" : "#FF6B6B" }
-      }
-      transition={{ duration: 0.3 }}
-      aria-live="polite"
-    >
-      {acceptMessages ? "On" : "Off"}
-    </motion.span>
+                <motion.span
+                className="text-[var(--text-primary)] font-medium"
+                style={{ color: acceptMessages ? "var(--color-accent-mint)" : "#FF6B6B" }}
+                animate={
+                  { color: acceptMessages ? "var(--color-accent-mint)" : "#FF6B6B" }
+                }
+                transition={{ duration: 0.3 }}
+                aria-live="polite"
+              >
+                {acceptMessages ? "On" : "Off"}
+              </motion.span>
             </motion.div>
           </motion.div>
         </AceternityCard>
@@ -499,9 +545,9 @@ function UserDashboard() {
             <FancyButton
               onClick={(e) => {
                 e.preventDefault();
-                fetchMessages(true);
+                fetchMessages(true, false);
               }}
-              variant="gradient"            // use same visual style as Copy button
+              variant="gradient"
               size="sm"
               disabled={isLoading}
               className={`
